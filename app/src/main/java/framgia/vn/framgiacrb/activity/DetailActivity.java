@@ -42,7 +42,7 @@ public class DetailActivity extends AppCompatActivity {
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(DetailActivity.this, EditActivity.class);
+                Intent intent = new Intent(DetailActivity.this, CreateEventActivity.class);
                 intent.putExtra(Constant.ID_KEY, getIntent().getStringExtra(Constant.ID_KEY));
                 startActivity(intent);
             }

@@ -29,6 +29,9 @@ public class Constant {
     public static final String SATURDAY = "7";
     public static final String WEEKLY = "Weekly";
     public static final String NO_REPEAT = "No Repeat";
+    public static final String DAILY = "Daily";
+    public static final String MONTHLY = "Monthly";
+    public static final String YEARLY = "Yearly";
     public static final int SHOW_DURATION = 1000;
     public static final int HIDE_DURATION = 500;
     public static final String MESSAGE = "MESSAGE";

@@ -48,6 +48,7 @@ import java.util.Locale;
 
 import framgia.vn.framgiacrb.R;
 import framgia.vn.framgiacrb.constant.Constant;
+import framgia.vn.framgiacrb.constant.RepeatTypeEnum;
 import framgia.vn.framgiacrb.data.local.EventRepositoriesLocal;
 import framgia.vn.framgiacrb.data.model.CreateEventResponse;
 import framgia.vn.framgiacrb.data.model.DayOfWeekId;
@@ -57,6 +58,7 @@ import framgia.vn.framgiacrb.data.model.RepeatOnAttribute;
 import framgia.vn.framgiacrb.data.model.Session;
 import framgia.vn.framgiacrb.network.ServiceBuilder;
 import framgia.vn.framgiacrb.object.EventInWeek;
+import framgia.vn.framgiacrb.object.RealmController;
 import framgia.vn.framgiacrb.utils.DialogUtils;
 import framgia.vn.framgiacrb.utils.TimeUtils;
 import framgia.vn.framgiacrb.utils.Utils;
@@ -96,6 +98,7 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnTou
     private int mCurrentIndexOfSpinnerChoice = 0;
     private int mRepeatEvery = 1;
     private String mRepeatType = "";
+    private String mEventIdForUpdate;
     private ArrayList<String> mListDayOfWeekRepeat = new ArrayList<>();
 
     boolean isRepeat;
@@ -109,6 +112,9 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnTou
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_event);
+
+        // get EventIdForUpdate to distinguish with create event
+        mEventIdForUpdate = getIntent().getStringExtra(Constant.ID_KEY);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar_event);
         setSupportActionBar(mToolbar);
@@ -250,6 +256,28 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnTou
         dft = new SimpleDateFormat(Constant.FORMAT_TIME, Locale.getDefault());
         mTxtTimeStart.setTag(dft.format(mCal.getTime()));
         mTxtTimeFinish.setTag(dft.format(mCal.getTime()));
+        // For Update Event
+        if (null != mEventIdForUpdate) {
+            // Set Title Of Toolbar
+            mTxtNewEvent.setText("Update Event");
+            Event event = RealmController.with(this).getEventById(mEventIdForUpdate);
+            mDateEventFinishRepeat = (Date) event.getEndRepeat();
+            mDateStart = (Date) event.getStartTime().clone();
+            mDateFinish = (Date) event.getFinishTime().clone();
+            mTimeEventStart = (Date) event.getStartTime().clone();
+            mTimeEventFinish = (Date) event.getFinishTime().clone();
+            mRepeatType = event.getRepeatType();
+            mRepeatEvery = (event.getRepeatEvery() == 0) ? 1 : event.getRepeatEvery();
+            mCurrentIndexOfSpinnerChoice = RepeatTypeEnum.getIndexByValue(mRepeatType);
+            mTxtTimeStart.setTag(dft.format(mTimeEventStart));
+            mTxtTimeFinish.setTag(dft.format(mTimeEventFinish));
+            mTxtDateStart.setText(TimeUtils.toStringDate(mDateStart));
+            mTxtDateFinish.setText(TimeUtils.toStringDate(mDateFinish));
+            mTxtTimeStart.setText(Utils.formatTime(mTimeEventStart.getHours(), mTimeEventStart.getMinutes()));
+            mTxtTimeFinish.setText(Utils.formatTime(mTimeEventFinish.getHours(), mTimeEventFinish.getMinutes()));
+            mTxtRepeat.setText((null == mRepeatType) ? Constant.NO_REPEAT : mRepeatType);
+            mEdtTitle.setText(event.getTitle());
+        } // end Update Event
     }
 
     public void addEventFormWidgets() {
@@ -313,10 +341,15 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnTou
             mRepeatSpinner = (Spinner) v.findViewById(R.id.repeat_spinner);
             mRepeatSpinner.setSelection(0);
             mRepeatEverySpinner = (Spinner) v.findViewById(R.id.repeat_every_spinner);
+            mRepeatEverySpinner.setSelection(mRepeatEvery-1);
             mRepeatSpinner.setSelection(this.mCurrentItemSelectedOnSpinnerChoice);
             mStartRepeat = (EditText) v.findViewById(R.id.start_edittext);
             mEndEditText = (EditText) v.findViewById(R.id.end_edittext);
 
+            if (mDateEventFinishRepeat != null) {
+                mEndEditText.setText(Utils.formatDate(mDateEventFinishRepeat.getDate(),
+                        mDateEventFinishRepeat.getMonth() + 1, mDateEventFinishRepeat.getYear()));
+            }
             // Setup listener
             mRepeatSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
@@ -353,11 +386,11 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnTou
                     now.get(Calendar.MONTH) + 1,
                     now.get(Calendar.YEAR)
             ));
-            mEndEditText = (EditText) v.findViewById(R.id.end_edittext);
             mEndEditText.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Calendar now = Calendar.getInstance();
+                    if (mDateEventFinishRepeat != null) now.setTime(mDateEventFinishRepeat);
                     mDatePickerDialog = DatePickerDialog.newInstance(
                             MyDialogRepeat.this,
                             now.get(Calendar.YEAR),

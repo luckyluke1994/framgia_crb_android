@@ -18,16 +18,18 @@ public class Utils {
 
     public static String formatTime(int hourOfDay, int minutes) {
         String formatHour, formatMinute;
-        if (hourOfDay >= 10) {
-            formatHour = String.valueOf(hourOfDay);
-        } else {
-            formatHour = "0" + String.valueOf(hourOfDay);
-        }
-        if (minutes >= 10) {
-            formatMinute = String.valueOf(minutes);
-        } else {
-            formatMinute = "0" + String.valueOf(minutes);
-        }
+        formatHour = (hourOfDay >= 10) ? String.valueOf(hourOfDay) : "0" + String.valueOf(hourOfDay);
+//        if (hourOfDay >= 10) {
+//            formatHour = String.valueOf(hourOfDay);
+//        } else {
+//            formatHour = "0" + String.valueOf(hourOfDay);
+//        }
+        formatMinute = (minutes >= 10) ? String.valueOf(minutes) : "0" + String.valueOf(minutes);
+//        if (minutes >= 10) {
+//            formatMinute = String.valueOf(minutes);
+//        } else {
+//            formatMinute = "0" + String.valueOf(minutes);
+//        }
         return formatHour + ":" + formatMinute + " ";
     }
 
